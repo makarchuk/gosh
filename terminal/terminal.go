@@ -14,7 +14,16 @@ func InitTerminal() Terminal {
 } 
 
 func (t Terminal) Invitation() string {
-  return t.Username() + ":" + t.Pwd() + "$ "
+  return t.Username() + "@" + t.Hostname() + ":" + t.Pwd() + "$ "
+}
+
+func (t Terminal) Hostname() string {
+  host, err := os.Hostname()
+  if err != nil {
+    return "localhost"
+  } else {
+    return host
+  }
 }
 
 func (t Terminal) Pwd() string {
@@ -44,3 +53,4 @@ func (t Terminal) Username() string {
   }
 
 }
+
