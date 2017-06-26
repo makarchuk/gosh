@@ -1,8 +1,6 @@
-# Shog
+#Shog
 Anagram for Gosh (Go Shell)
 
 Simple terminal created for purposes of understanding and getting into go.
-
-Works as echo-shell so far but I'm planning to change it. 
 
 Remarks and Advices are highly appreciated
