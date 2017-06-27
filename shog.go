@@ -1,10 +1,10 @@
 package main
 
 import (
-  "./terminal"
+  "./shell"
 )
 
 func main() {
-  t := terminal.InitTerminal()
-  t.Run()
+  s := shell.InitShell()
+  s.Run()
 }
