@@ -6,5 +6,5 @@ import (
 
 func main() {
   s := shell.InitShell()
-  s.Run()
+  s.Read()
 }

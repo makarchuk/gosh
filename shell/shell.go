@@ -4,20 +4,31 @@ import (
   "os"
   "fmt"
   "bufio"
-  "syscall"
   "strings"
   "os/user"
   "os/exec"
   "strconv"
-  "os/signal"
 )
 
 type Shell struct {
   Dir string
+  term *Term
 }
 
+func (s Shell) Read() {
+  for {
+    ch := make([]byte, 3)
+    s.term.Read(ch)
+    fmt.Println(ch)
+    s.bytesToKey(ch)
+
+  }
+}
+
+
 func InitShell() Shell {
-  s := Shell{ "" }
+  term, _ := open("/dev/tty")
+  s := Shell{ "", term}
   s.Dir = s.Pwd()
   return s
 } 
@@ -86,48 +97,4 @@ func (s Shell) HandleInput(inp string) {
   command := chunks[0]
   args := chunks[1:]
   s.RunBinary(command, args...)
-}
-
-func fixTerminal(){
-  exec.Command("stty", "-F", "/dev/tty", "echo").Run()
-}
-
-func setRawTerminal(){
-  //Change Shell to some strange state
-  //https://stackoverflow.com/a/17278730/4091324
-  exec.Command("stty", "-F", "/dev/tty", "cbreak", "min", "1").Run()
-  exec.Command("stty", "-F", "/dev/tty", "-echo").Run()
-  c := make(chan os.Signal, 2)
-  signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-  go func() {
-    <-c
-    fixTerminal()
-    os.Exit(0)
-  }()
-}
-
-func (s Shell) Run() {
-  setRawTerminal()
-  defer fixTerminal()
-  var b []byte = make([]byte, 1) 
-  buffer := ""
-  fmt.Print(s.Invitation())  
-  for {
-    os.Stdin.Read(b)
-    chr := b[0]
-    if chr == 4 && buffer=="" { //Ctrl+D 
-      break
-    } else if chr == 127 { //backspace
-      buffer = buffer[:len(buffer)-1]
-    } else if chr == 10 { //enter
-      buffer = strings.Trim(buffer, "\n\t ")
-      s.HandleInput(buffer)
-      fmt.Print(s.Invitation())
-      buffer = ""
-    } else {
-      buffer = buffer + string(b)
-    }
-    fmt.Print(string(chr))
-  }
-  fmt.Println("Bye!")
 }
