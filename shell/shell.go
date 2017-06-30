@@ -13,18 +13,19 @@ import (
 )
 
 type Shell struct {
-  Dir string
+  dir string
+  buffer string
 }
 
 func InitShell() Shell {
-  s := Shell{ "" }
-  s.Dir = s.Pwd()
+  s := Shell{ "", "" }
+  s.dir = s.Pwd()
   return s
 } 
 
 func (s Shell) Invitation() string {
   // TODO: Build from format string. Makre it customizable
-  return s.Username() + "@" + s.Hostname() + ":" + s.Dir + "$ "
+  return s.Username() + "@" + s.Hostname() + ":" + s.dir + "$ "
 }
 
 func (s Shell) Hostname() string {
@@ -109,25 +110,12 @@ func setRawTerminal(){
 func (s Shell) Run() {
   setRawTerminal()
   defer fixTerminal()
-  var b []byte = make([]byte, 1) 
-  buffer := ""
   fmt.Print(s.Invitation())  
   for {
+    var b []byte = make([]byte, 3)
     os.Stdin.Read(b)
-    chr := b[0]
-    if chr == 4 && buffer=="" { //Ctrl+D 
-      break
-    } else if chr == 127 { //backspace
-      buffer = buffer[:len(buffer)-1]
-    } else if chr == 10 { //enter
-      buffer = strings.Trim(buffer, "\n\t ")
-      s.HandleInput(buffer)
-      fmt.Print(s.Invitation())
-      buffer = ""
-    } else {
-      buffer = buffer + string(b)
-    }
-    fmt.Print(string(chr))
+    //chr := b[0]
+    s.bytesToKey(b)
   }
   fmt.Println("Bye!")
 }
